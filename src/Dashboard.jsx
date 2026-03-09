@@ -1,55 +1,73 @@
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-} from "chart.js";
+import React from "react";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+function Dashboard({ activity, toggle }) {
 
-function Dashboard({ activity }) {
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-  const weeklyData = activity.slice(-7);
+  const months = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+  ];
 
-  const data = {
-    labels: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
-    datasets: [
-      {
-        label: "Puzzles Solved",
-        data: weeklyData,
-        backgroundColor: "#4caf50"
-      }
-    ]
+  const startDate = new Date(new Date().getFullYear(), 0, 1);
+
+  const getDate = (index) => {
+
+    const date = new Date(startDate);
+
+    date.setDate(startDate.getDate() + index);
+
+    return date.toDateString();
   };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top"
-      },
-      title: {
-        display: true,
-        text: "Weekly Puzzle Activity"
-      }
+  const getColor = (value) => {
+
+    switch(value){
+      case 0: return "cell level0";
+      case 1: return "cell level1";
+      case 2: return "cell level2";
+      case 3: return "cell level3";
+      case 4: return "cell level4";
+      default: return "cell";
     }
+
   };
 
   return (
-    <div style={{ width: "600px", margin: "40px auto" }}>
-      <Bar data={data} options={options} />
+
+    <div className="heatmap-wrapper">
+
+      <div className="months">
+        {months.map((m,i)=>(
+          <span key={i}>{m}</span>
+        ))}
+      </div>
+
+      <div className="heatmap">
+
+        <div className="days">
+          {days.map((d,i)=>(
+            <span key={i}>{d}</span>
+          ))}
+        </div>
+
+        <div className="grid">
+
+          {activity.map((value,index)=>(
+            <div
+              key={index}
+              className={getColor(value)}
+              onClick={()=>toggle(index)}
+              title={`${value} activity on ${getDate(index)}`}
+            />
+          ))}
+
+        </div>
+
+      </div>
+
     </div>
+
   );
 }
 
