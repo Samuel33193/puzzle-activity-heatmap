@@ -1,124 +1,139 @@
-import { useEffect, useState } from "react";
-import dayjs from "dayjs";
-import { getAllActivity, saveActivity } from "./db/activityService";
+import { useState, useRef } from "react";
+import "./App.css";
+import html2canvas from "html2canvas";
+import Dashboard from "./Dashboard.jsx";
 
 function App() {
 
-  const startOfYear = dayjs().startOf("year");
+  const savedData = JSON.parse(localStorage.getItem("activity")) || Array(365).fill(0);
+  const [activity, setActivity] = useState(savedData);
 
-  const [activityMap, setActivityMap] = useState({});
+  const [darkMode, setDarkMode] = useState(false);
 
-  const days = [];
+  const heatmapRef = useRef(null);
 
-  for (let i = 0; i < 365; i++) {
-    days.push(startOfYear.add(i, "day"));
-  }
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 364);
 
-  useEffect(() => {
+  const startDay = startDate.getDay();
 
-    async function loadActivity() {
+  const handleClick = (index) => {
 
-      const data = await getAllActivity();
+    const newActivity = [...activity];
+    newActivity[index] = (newActivity[index] + 1) % 5;
 
-      const map = {};
+    setActivity(newActivity);
 
-      data.forEach(a => {
-        map[a.date] = a;
-      });
+    localStorage.setItem("activity", JSON.stringify(newActivity));
+  };
 
-      setActivityMap(map);
-
-    }
-
-    loadActivity();
-
-  }, []);
-
-  function getColor(date) {
-
-    const activity = activityMap[date];
-
-    if (!activity) return "#ebedf0";
-
-    const score = activity.score;
-
-    if (score < 50) return "#c6e48b";
-    if (score < 100) return "#7bc96f";
-    if (score < 150) return "#239a3b";
-
-    return "#196127";
-
-  }
-
-  async function markSolved(date) {
-
-    const score = Math.floor(Math.random() * 200);
-
-    await saveActivity({
-      date,
-      solved: true,
-      score
+  const downloadImage = () => {
+    html2canvas(heatmapRef.current).then((canvas) => {
+      const link = document.createElement("a");
+      link.download = "puzzle-heatmap.png";
+      link.href = canvas.toDataURL();
+      link.click();
     });
+  };
 
-    const updated = { ...activityMap };
+  let streak = 0;
 
-    updated[date] = { solved: true, score };
-
-    setActivityMap(updated);
-
+  for (let i = activity.length - 1; i >= 0; i--) {
+    if (activity[i] > 0) streak++;
+    else break;
   }
 
-  // 🔥 STREAK FUNCTION
-  function calculateStreak(activityMap) {
+  const totalPuzzles = activity.reduce((sum, val) => sum + val, 0);
 
-    let streak = 0;
-    let current = dayjs();
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-    while (activityMap[current.format("YYYY-MM-DD")]?.solved) {
-      streak++;
-      current = current.subtract(1, "day");
-    }
+  const months = [];
+  const current = new Date(startDate);
 
-    return streak;
+  for (let i = 0; i < 365; i += 30) {
+    months.push(
+      current.toLocaleString("default", { month: "short" })
+    );
+    current.setMonth(current.getMonth() + 1);
   }
-
-  const streak = calculateStreak(activityMap);
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h1>Puzzle Activity Heatmap</h1>
+    <div className={darkMode ? "dark" : ""}>
 
-      <h2>🔥 Current Streak: {streak} days</h2>
+      <div className="top-buttons">
+        <button onClick={() => setDarkMode(!darkMode)}>
+          Toggle Dark Mode
+        </button>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(53, 12px)",
-          gap: "4px",
-          marginTop: "20px"
-        }}
-      >
-        {days.map((day, i) => {
-
-          const date = day.format("YYYY-MM-DD");
-
-          return (
-            <div
-              key={i}
-              title={date}
-              onClick={() => markSolved(date)}
-              style={{
-                width: "12px",
-                height: "12px",
-                backgroundColor: getColor(date),
-                borderRadius: "2px",
-                cursor: "pointer"
-              }}
-            />
-          );
-
-        })}
+        <button onClick={downloadImage}>
+          Download Heatmap
+        </button>
       </div>
+
+      <h2>Puzzle Activity Heatmap</h2>
+
+      <h3>🔥 Current Streak: {streak} days</h3>
+      <h3>🧩 Total Puzzles Solved: {totalPuzzles}</h3>
+
+      <div ref={heatmapRef}>
+
+        <div className="months">
+          {months.map((m, i) => (
+            <span key={i}>{m}</span>
+          ))}
+        </div>
+
+        <div className="heatmap-wrapper">
+
+          <div className="days">
+            {days.map((day, i) => (
+              <span key={i}>{day}</span>
+            ))}
+          </div>
+
+          <div className="heatmap-container">
+
+            <div className="heatmap">
+
+              {Array.from({ length: startDay }).map((_, i) => (
+                <div key={"empty"+i} className="cell"></div>
+              ))}
+
+              {activity.map((level, index) => {
+
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + index);
+
+                return (
+                  <div
+                    key={index}
+                    className={`cell level${level}`}
+                    onClick={() => handleClick(index)}
+                    title={`${date.toDateString()} - ${level} puzzles`}
+                  ></div>
+                );
+              })}
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div className="legend">
+          <span>Less</span>
+          <div className="cell"></div>
+          <div className="cell level1"></div>
+          <div className="cell level2"></div>
+          <div className="cell level3"></div>
+          <div className="cell level4"></div>
+          <span>More</span>
+        </div>
+
+      </div>
+
+      <Dashboard activity={activity} />
+
     </div>
   );
 }
