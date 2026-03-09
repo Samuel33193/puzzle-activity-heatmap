@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import html2canvas from "html2canvas";
 import Dashboard from "./Dashboard";
-
 import { saveActivity, loadActivity } from "./db/activityService";
 
 function App() {
 
+  const currentYear = new Date().getFullYear();
+
+  const [year, setYear] = useState(currentYear);
   const [activity, setActivity] = useState(Array(365).fill(0));
 
   const heatmapRef = useRef(null);
@@ -14,13 +16,13 @@ function App() {
   useEffect(() => {
 
     async function fetchData(){
-      const data = await loadActivity();
+      const data = await loadActivity(year);
       setActivity(data);
     }
 
     fetchData();
 
-  }, []);
+  }, [year]);
 
   const toggleCell = async (index) => {
 
@@ -30,7 +32,7 @@ function App() {
 
     setActivity(updated);
 
-    await saveActivity(updated);
+    await saveActivity(year, updated);
 
   };
 
@@ -48,7 +50,7 @@ function App() {
 
   };
 
-  /* ----------- STATS CALCULATION ----------- */
+  /* -------- STATS -------- */
 
   const totalActiveDays = activity.filter(v => v > 0).length;
 
@@ -81,6 +83,26 @@ function App() {
 
       <h1>Puzzle Activity Heatmap</h1>
 
+      {/* YEAR SELECTOR */}
+
+      <div className="yearSelector">
+
+        {[currentYear-2,currentYear-1,currentYear].map(y => (
+
+          <button
+            key={y}
+            className={year === y ? "yearBtn activeYear" : "yearBtn"}
+            onClick={()=>setYear(y)}
+          >
+            {y}
+          </button>
+
+        ))}
+
+      </div>
+
+      {/* STATS */}
+
       <div className="stats">
 
         <p>🔥 Current Streak: {currentStreak} days</p>
@@ -90,7 +112,7 @@ function App() {
       </div>
 
       <div ref={heatmapRef}>
-        <Dashboard activity={activity} toggle={toggleCell} />
+        <Dashboard activity={activity} toggle={toggleCell} year={year}/>
       </div>
 
       <button className="downloadBtn" onClick={downloadImage}>

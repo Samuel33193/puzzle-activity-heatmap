@@ -2,7 +2,9 @@ import { openDB } from "./indexedDB";
 
 const STORE_NAME = "activity";
 
-export async function saveActivity(data) {
+/* -------- SAVE ACTIVITY FOR A YEAR -------- */
+
+export async function saveActivity(year, data) {
 
   const db = await openDB();
 
@@ -10,11 +12,17 @@ export async function saveActivity(data) {
 
   const store = tx.objectStore(STORE_NAME);
 
-  store.put({ id: 1, data });
+  store.put({
+    id: year,
+    data: data
+  });
 
+  return tx.complete;
 }
 
-export async function loadActivity() {
+/* -------- LOAD ACTIVITY FOR A YEAR -------- */
+
+export async function loadActivity(year) {
 
   const db = await openDB();
 
@@ -22,16 +30,23 @@ export async function loadActivity() {
 
   const store = tx.objectStore(STORE_NAME);
 
-  const request = store.get(1);
+  const request = store.get(year);
 
   return new Promise((resolve) => {
 
     request.onsuccess = () => {
 
-      resolve(request.result?.data || Array(365).fill(0));
+      if (request.result) {
+        resolve(request.result.data);
+      } else {
+        resolve(Array(365).fill(0));
+      }
 
     };
 
-  });
+    request.onerror = () => {
+      resolve(Array(365).fill(0));
+    };
 
+  });
 }

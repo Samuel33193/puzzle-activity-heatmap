@@ -19,6 +19,31 @@ h1{
   margin-bottom:20px;
 }
 
+/* ---------- YEAR SELECTOR ---------- */
+
+.yearSelector{
+  margin-bottom:20px;
+}
+
+.yearBtn{
+  margin:5px;
+  padding:6px 14px;
+  border:none;
+  background:#161b22;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.yearBtn:hover{
+  background:#30363d;
+}
+
+.activeYear{
+  background:#238636;
+}
+
 /* ---------- STATS PANEL ---------- */
 
 .stats{
