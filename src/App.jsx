@@ -14,11 +14,8 @@ function App() {
   useEffect(() => {
 
     async function fetchData(){
-
       const data = await loadActivity();
-
       setActivity(data);
-
     }
 
     fetchData();
@@ -51,11 +48,46 @@ function App() {
 
   };
 
+  /* ----------- STATS CALCULATION ----------- */
+
+  const totalActiveDays = activity.filter(v => v > 0).length;
+
+  let currentStreak = 0;
+  let longestStreak = 0;
+  let temp = 0;
+
+  activity.forEach(v => {
+
+    if(v > 0){
+      temp++;
+      longestStreak = Math.max(longestStreak, temp);
+    } else {
+      temp = 0;
+    }
+
+  });
+
+  for(let i = activity.length - 1; i >= 0; i--){
+    if(activity[i] > 0){
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+
   return (
 
     <div className="container">
 
       <h1>Puzzle Activity Heatmap</h1>
+
+      <div className="stats">
+
+        <p>🔥 Current Streak: {currentStreak} days</p>
+        <p>🏆 Longest Streak: {longestStreak} days</p>
+        <p>📅 Total Active Days: {totalActiveDays}</p>
+
+      </div>
 
       <div ref={heatmapRef}>
         <Dashboard activity={activity} toggle={toggleCell} />

@@ -1,25 +1,42 @@
-/* Page background */
+/* ---------- GLOBAL PAGE STYLE ---------- */
 
 body{
+  margin:0;
+  padding:0;
   background:#0d1117;
   color:white;
   font-family:Arial, Helvetica, sans-serif;
 }
 
-/* Main container */
+/* ---------- MAIN CONTAINER ---------- */
 
 .container{
   text-align:center;
   padding:30px;
 }
 
-/* Title */
-
 h1{
-  margin-bottom:30px;
+  margin-bottom:20px;
 }
 
-/* Download button */
+/* ---------- STATS PANEL ---------- */
+
+.stats{
+  display:flex;
+  justify-content:center;
+  gap:40px;
+  margin-bottom:25px;
+  font-size:14px;
+  font-weight:500;
+}
+
+.stats p{
+  background:#161b22;
+  padding:8px 14px;
+  border-radius:6px;
+}
+
+/* ---------- DOWNLOAD BUTTON ---------- */
 
 .downloadBtn{
   margin-top:25px;
@@ -29,19 +46,20 @@ h1{
   color:white;
   border-radius:6px;
   cursor:pointer;
+  font-size:14px;
 }
 
 .downloadBtn:hover{
   background:#2ea043;
 }
 
-/* Heatmap wrapper */
+/* ---------- HEATMAP WRAPPER ---------- */
 
 .heatmap-wrapper{
   margin-top:20px;
 }
 
-/* Months row */
+/* ---------- MONTH LABELS ---------- */
 
 .months{
   display:flex;
@@ -52,13 +70,13 @@ h1{
   color:white;
 }
 
-/* Heatmap layout */
+/* ---------- HEATMAP LAYOUT ---------- */
 
 .heatmap{
   display:flex;
 }
 
-/* Days column */
+/* ---------- DAY LABELS ---------- */
 
 .days{
   display:flex;
@@ -72,7 +90,7 @@ h1{
   height:18px;
 }
 
-/* Grid */
+/* ---------- GRID ---------- */
 
 .grid{
   display:grid;
@@ -81,7 +99,7 @@ h1{
   gap:3px;
 }
 
-/* Cells */
+/* ---------- HEATMAP CELLS ---------- */
 
 .cell{
   width:14px;
@@ -90,7 +108,7 @@ h1{
   cursor:pointer;
 }
 
-/* Activity levels */
+/* ---------- ACTIVITY LEVEL COLORS ---------- */
 
 .level0{
   background:#161b22;
